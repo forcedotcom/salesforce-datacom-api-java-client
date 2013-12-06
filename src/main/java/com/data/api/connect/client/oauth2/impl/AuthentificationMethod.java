@@ -27,8 +27,6 @@ package com.data.api.connect.client.oauth2.impl;
 
 import java.io.IOException;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -37,6 +35,7 @@ import org.codehaus.jackson.map.PropertyNamingStrategy;
 import com.data.api.connect.client.oauth2.AuthenticationException;
 import com.data.api.connect.client.oauth2.OAuthToken;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
+import com.ning.http.client.AsyncHttpClient;
 
 
 public abstract class AuthentificationMethod {
@@ -54,14 +53,14 @@ public abstract class AuthentificationMethod {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     }
     
-    private CloseableHttpClient client = HttpClients.createDefault();
+    private AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
     
-    public void setHttpClient(CloseableHttpClient client) {
-        this.client = client;
+    public void setHttpClient(AsyncHttpClient asyncHttpClient) {
+        this.asyncHttpClient = asyncHttpClient;
     }
     
-    public CloseableHttpClient getHttpClient() {
-        return client;
+    public AsyncHttpClient getHttpClient() {
+        return asyncHttpClient;
     }
     
     public abstract OAuthToken authenticate() throws IOException,

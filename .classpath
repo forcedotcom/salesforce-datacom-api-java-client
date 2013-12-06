@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="target/dependency/jackson-core-asl-1.9.9.jar"/>
+	<classpathentry kind="lib" path="target/dependency/jackson-mapper-asl-1.9.9.jar"/>
+	<classpathentry kind="lib" path="target/dependency/aopalliance-1.0.jar"/>
+	<classpathentry kind="lib" path="target/dependency/bsh-2.0b4.jar"/>
+	<classpathentry kind="lib" path="target/dependency/guice-2.0.jar"/>
+	<classpathentry kind="lib" path="target/dependency/jcommander-1.12.jar"/>
+	<classpathentry kind="lib" path="target/dependency/junit-3.8.1.jar"/>
+	<classpathentry kind="lib" path="target/dependency/mockito-all-1.8.5.jar"/>
+	<classpathentry kind="lib" path="target/dependency/testng-5.14.6.jar" sourcepath="C:/Users/akolesnik/.m2/repository/org/testng/testng/5.14.6/testng-5.14.6-sources.jar"/>
+	<classpathentry kind="lib" path="target/dependency/async-http-client-1.7.22.jar"/>
+	<classpathentry kind="lib" path="target/dependency/netty-3.6.6.Final.jar"/>
+	<classpathentry kind="lib" path="target/dependency/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

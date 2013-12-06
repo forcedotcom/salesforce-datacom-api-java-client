@@ -27,22 +27,14 @@ package com.data.api.connect.client.oauth2.impl;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import java.util.concurrent.Future;
 
 import com.data.api.connect.client.oauth2.AuthenticationException;
 import com.data.api.connect.client.oauth2.IOAuthData;
 import com.data.api.connect.client.oauth2.OAuthToken;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import com.ning.http.client.Response;
 
 
 /**
@@ -77,31 +69,28 @@ public class UsernamePasswordAuthentication extends AuthentificationMethod {
         String username = oAuthData.getUsername();
         String password = oAuthData.getPassword();
         
-        HttpPost httpPost = new HttpPost(getENVIRONMENT());
+        BoundRequestBuilder builder = getHttpClient().preparePost(getENVIRONMENT());
         
-        httpPost.setHeader("Accept", "application/json");
+        builder.addHeader("Accept", "application/json");
         
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        builder.addParameter("grant_type", "password");
+        builder.addParameter("client_secret", "secret");
+        builder.addParameter("client_id", clientId);
+        builder.addParameter("username", username);
+        builder.addParameter("password", password);
         
-        nvps.add(new BasicNameValuePair("grant_type", "password"));
-        nvps.add(new BasicNameValuePair("client_secret", "secret"));
-        nvps.add(new BasicNameValuePair("client_id", clientId));
-        nvps.add(new BasicNameValuePair("username", username));
-        nvps.add(new BasicNameValuePair("password", password));
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        
-        CloseableHttpResponse response = getHttpClient().execute(httpPost);
-        
+        Future<Response> f = builder.execute();
+        int statusCode = -1;
         String responseBody = null;
-        int statusCode = response.getStatusLine().getStatusCode();
-        if (statusCode == HttpStatus.SC_OK) {
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                responseBody = EntityUtils.toString(entity);
+        try {
+            Response response = f.get();
+            statusCode = response.getStatusCode();
+            if (statusCode == 200) {
+                return processResponse(responseBody = response.getResponseBody());
             }
-            // ensure it is fully consumed
-            EntityUtils.consume(entity);
-            return processResponse(responseBody);
+        }
+        catch (Exception e) {
+            // TODO: handle exception
         }
         throw new UnauthenticatedSessionException(statusCode + " " + responseBody);
     }
