@@ -69,7 +69,6 @@ public class OAuthToken {
         return tokenType;
     }
     
-    
     public String getRefreshToken() {
         return refreshToken;
     }

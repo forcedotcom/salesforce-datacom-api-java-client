@@ -23,20 +23,26 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.data.api.connect.client.oauth2;
+package com.data.api.connect.client.util;
+
+import java.util.List;
 
 
-public interface IOAuthData {
+public class StringUtils {
     
-    OAuthMethod getAuthMethod();
-    
-    String getRefreshToken();
-    
-    String getClientKey();
-    
-    String getClientCode();
-    
-    String getUsername();
-    
-    String getPassword();
+    public static <T extends Object> String join(List<T> list, final String separator) {
+        if (list == null) {
+            return null;
+        }
+        final StringBuilder buf = new StringBuilder();
+        for (T item : list) {
+            if (buf.length() > 0) {
+                buf.append(separator);
+            }
+            if (item != null) {
+                buf.append(item);
+            }
+        }
+        return buf.toString();
+    }
 }

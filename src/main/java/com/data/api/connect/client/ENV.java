@@ -23,20 +23,34 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.data.api.connect.client.oauth2;
 
+package com.data.api.connect.client;
 
-public interface IOAuthData {
+public class ENV {
     
-    OAuthMethod getAuthMethod();
+    private String SERVER = "https://api.jigsaw.com";
     
-    String getRefreshToken();
+    private static ENV instance = null;
     
-    String getClientKey();
+    protected ENV () {
+        // Exists only to defeat instantiation.
+    }
     
-    String getClientCode();
+    public static ENV getInstance() {
+        if (instance == null) {
+            instance = new ENV();
+        }
+        return instance;
+    }
     
-    String getUsername();
+    public String SERVER(String SERVER) {
+        if (SERVER != null && SERVER.length() > 1) {
+            getInstance().SERVER = SERVER;
+        }
+        return getInstance().SERVER;
+    }
     
-    String getPassword();
+    public String SERVER() {
+        return getInstance().SERVER;
+    }
 }

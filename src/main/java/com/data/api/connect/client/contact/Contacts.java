@@ -23,20 +23,24 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.data.api.connect.client.oauth2;
+package com.data.api.connect.client.contact;
+
+import java.util.List;
 
 
-public interface IOAuthData {
+public class Contacts {
     
-    OAuthMethod getAuthMethod();
+    private List<Contact> contacts;
     
-    String getRefreshToken();
+    public Contacts () {
+        super();
+    }
     
-    String getClientKey();
+    public List<Contact> getContacts() {
+        return contacts;
+    }
     
-    String getClientCode();
-    
-    String getUsername();
-    
-    String getPassword();
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
+    }
 }

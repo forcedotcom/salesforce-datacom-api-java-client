@@ -23,68 +23,37 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.data.api.connect.client.oauth2.impl;
+package com.data.api.connect.client.contact.impl;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.util.concurrent.Future;
+import java.util.List;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 
+import com.data.api.connect.client.contact.Contact;
+import com.data.api.connect.client.contact.ContactService;
+import com.data.api.connect.client.contact.Contacts;
 import com.data.api.connect.client.oauth2.AuthenticationException;
 import com.data.api.connect.client.oauth2.IOAuthData;
-import com.data.api.connect.client.oauth2.OAuthToken;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import com.data.api.connect.client.util.StringUtils;
 import com.ning.http.client.Response;
 
 
-/**
- * @author Aleksey Kolesnik
- */
-public class UsernamePasswordAuthentication extends AuthentificationMethod {
+public class ContactServiceImpl extends AbstractService implements ContactService {
     
-    
-    private final IOAuthData oAuthData;
-    
-    public UsernamePasswordAuthentication (IOAuthData oAuthData) {
-        this.oAuthData = oAuthData;
+    public ContactServiceImpl (IOAuthData oAutData) {
+        this.oAutData = oAutData;
     }
     
-    /**
-     * <p>
-     * Authenticate using a username and password. This is discouraged by the
-     * oauth flow, but it allows for transparent (and non human-intervention)
-     * authentication).
-     * </p>
-     * 
-     * @return The response retrieved from the REST API (usually an XML string
-     *         with all the tokens)
-     * @throws IOException
-     * @throws UnauthenticatedSessionException
-     * @throws AuthenticationException
-     */
     @Override
-    public OAuthToken authenticate() throws IOException, UnauthenticatedSessionException,
-            AuthenticationException {
-        String clientId = URLEncoder.encode(oAuthData.getClientKey(), "UTF-8");
-        String username = oAuthData.getUsername();
-        String password = oAuthData.getPassword();
-        
-        BoundRequestBuilder builder = getHttpClient().preparePost(
-                env.SERVER() + "/connect/oauth2/token");
-        
-        builder.addHeader("Accept", "application/json");
-        
-        builder.addParameter("grant_type", "password");
-        builder.addParameter("client_secret", "secret");
-        builder.addParameter("client_id", clientId);
-        builder.addParameter("username", username);
-        builder.addParameter("password", password);
-        
-        Future<Response> f = builder.execute();
+    public List<Contact> get(List<Long> ids) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException {
         int statusCode = -1;
         String responseBody = null;
         try {
-            Response response = f.get();
+            Response response = execute(asyncHttpClient.prepareGet(env.SERVER()
+                    + "/connect/data/v3/contacts/get/" + StringUtils.join(ids, ",")));
             statusCode = response.getStatusCode();
             if (statusCode == 200) {
                 return processResponse(responseBody = response.getResponseBody());
@@ -95,4 +64,22 @@ public class UsernamePasswordAuthentication extends AuthentificationMethod {
         }
         throw new UnauthenticatedSessionException(statusCode + " " + responseBody);
     }
+    
+    protected List<Contact> processResponse(String response)
+            throws AuthenticationException {
+        try {
+            Contacts contacts = mapper.readValue(response, Contacts.class);
+            return contacts != null ? contacts.getContacts() : null;
+        }
+        catch (JsonParseException e) {
+            throw new AuthenticationException(e);
+        }
+        catch (JsonMappingException e) {
+            throw new AuthenticationException(e);
+        }
+        catch (IOException e) {
+            throw new AuthenticationException(e);
+        }
+    }
+    
 }

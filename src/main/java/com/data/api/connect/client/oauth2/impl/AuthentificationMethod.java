@@ -32,6 +32,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.PropertyNamingStrategy;
 
+import com.data.api.connect.client.ENV;
 import com.data.api.connect.client.oauth2.AuthenticationException;
 import com.data.api.connect.client.oauth2.OAuthToken;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
@@ -40,13 +41,6 @@ import com.ning.http.client.AsyncHttpClient;
 
 public abstract class AuthentificationMethod {
     
-    /**
-     * <p>
-     * This URL is where the default Salesforce.com authentication is performed
-     * (regardless of environment).
-     * </p>
-     */
-    private String ENVIRONMENT = "https://api.data.com/connect/oauth2/token";
     // can reuse, share globally
     private final static ObjectMapper mapper = new ObjectMapper();
     static {
@@ -54,6 +48,8 @@ public abstract class AuthentificationMethod {
     }
     
     private AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+    
+    protected ENV env = ENV.getInstance();
     
     public void setHttpClient(AsyncHttpClient asyncHttpClient) {
         this.asyncHttpClient = asyncHttpClient;
@@ -98,14 +94,5 @@ public abstract class AuthentificationMethod {
         catch (IOException e) {
             throw new AuthenticationException(e);
         }
-    }
-    
-    public String getENVIRONMENT() {
-        return ENVIRONMENT;
-    }
-    
-    
-    public void setENVIRONMENT(String eNVIRONMENT) {
-        ENVIRONMENT = eNVIRONMENT;
     }
 }

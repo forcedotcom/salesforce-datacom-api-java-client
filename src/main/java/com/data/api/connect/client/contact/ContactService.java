@@ -23,20 +23,17 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.data.api.connect.client.oauth2;
+package com.data.api.connect.client.contact;
+
+import java.io.IOException;
+import java.util.List;
+
+import com.data.api.connect.client.oauth2.AuthenticationException;
+import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 
 
-public interface IOAuthData {
+public interface ContactService {
     
-    OAuthMethod getAuthMethod();
-    
-    String getRefreshToken();
-    
-    String getClientKey();
-    
-    String getClientCode();
-    
-    String getUsername();
-    
-    String getPassword();
+    List<Contact> get(List<Long> ids) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException;
 }
