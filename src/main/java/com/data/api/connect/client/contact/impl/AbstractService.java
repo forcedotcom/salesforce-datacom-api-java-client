@@ -36,6 +36,7 @@ import com.data.api.connect.client.oauth2.IOAuthData;
 import com.data.api.connect.client.oauth2.OAuthToken;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 import com.data.api.connect.client.oauth2.impl.AuthentificationMethod;
+import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
@@ -107,6 +108,59 @@ public abstract class AbstractService {
             response = builder.execute().get();
         }
         return response;
+    }
+    
+    protected void execute(final BoundRequestBuilder builder,
+            final AsyncCompletionHandler<Integer> handler) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException, ExecutionException,
+            InterruptedException {
+        if (!authenticated) {
+            authenticateSession();
+        }
+        
+        final FluentCaseInsensitiveStringsMap header = new FluentCaseInsensitiveStringsMap();
+        header.add("Accept", "application/json");
+        header.add("Authorization", "BEARER " + oAuthToken.getAccessToken());
+        header.add("x-ddc-client-id", oAutData.getClientCode());
+        builder.setHeaders(header);
+        
+        builder.execute(new AsyncCompletionHandler<Integer>() {
+            
+            @Override
+            public Integer onCompleted(Response response) throws Exception {
+                if (response.getStatusCode() == 401) {
+                    // update access token
+                    authenticateSession();
+                    // update header
+                    header.remove("Authorization");
+                    header.add("Authorization", "BEARER " + oAuthToken.getAccessToken());
+                    builder.setHeaders(header);
+                    
+                    builder.execute(new AsyncCompletionHandler<Integer>() {
+                        
+                        @Override
+                        public Integer onCompleted(Response response) throws Exception {
+                            handler.onCompleted(response);
+                            return response.getStatusCode();
+                        }
+                        
+                        @Override
+                        public void onThrowable(Throwable t) {
+                            handler.onThrowable(t);
+                        }
+                    });
+                } else {
+                    handler.onCompleted(response);
+                }
+                return response.getStatusCode();
+            }
+            
+            @Override
+            public void onThrowable(Throwable t) {
+                handler.onThrowable(t);
+            }
+        });
+        
     }
     
     

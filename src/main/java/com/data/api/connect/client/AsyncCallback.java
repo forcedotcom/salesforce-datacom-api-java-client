@@ -23,23 +23,14 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.data.api.connect.client.contact;
+package com.data.api.connect.client;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import com.data.api.connect.client.AsyncCallback;
-import com.data.api.connect.client.oauth2.AuthenticationException;
-import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
+import com.ning.http.client.Response;
 
 
-public interface ContactService {
+public interface AsyncCallback<T> {
     
-    List<Contact> get(List<Long> ids) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
+    Integer onCompleted(T data, Response response);
     
-    void get(List<Long> ids, AsyncCallback<List<Contact>> handler) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException,
-            InterruptedException, ExecutionException;
+    void onThrowable(Throwable t);
 }

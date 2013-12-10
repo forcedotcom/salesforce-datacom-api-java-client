@@ -27,9 +27,12 @@ package com.data.api.connect.client.contact.impl;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.data.api.connect.client.AsyncCallback;
 import com.data.api.connect.client.contact.Contact;
 import com.data.api.connect.client.contact.ContactService;
 import com.data.api.connect.client.contact.Contacts;
@@ -37,6 +40,7 @@ import com.data.api.connect.client.oauth2.AuthenticationException;
 import com.data.api.connect.client.oauth2.IOAuthData;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 import com.data.api.connect.client.util.StringUtils;
+import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.Response;
 
 
@@ -65,6 +69,31 @@ public class ContactServiceImpl extends AbstractService implements ContactServic
         throw new UnauthenticatedSessionException(statusCode + " " + responseBody);
     }
     
+    @Override
+    public void get(List<Long> ids, final AsyncCallback<List<Contact>> handler)
+            throws IOException, UnauthenticatedSessionException, AuthenticationException,
+            InterruptedException, ExecutionException {
+        execute(asyncHttpClient.prepareGet(env.SERVER()
+                + "/connect/data/v3/contacts/get/" + StringUtils.join(ids, ",")),
+                new AsyncCompletionHandler<Integer>() {
+                    
+                    @Override
+                    public Integer onCompleted(Response response) throws Exception {
+                        int statusCode = response.getStatusCode();
+                        if (response.getStatusCode() == 200) {
+                            handler.onCompleted(
+                                    processResponse(response.getResponseBody()), response);
+                        }
+                        return statusCode;
+                    }
+                    
+                    @Override
+                    public void onThrowable(Throwable t) {
+                        handler.onThrowable(t);
+                    }
+                });
+    }
+    
     protected List<Contact> processResponse(String response)
             throws AuthenticationException {
         try {
@@ -81,5 +110,4 @@ public class ContactServiceImpl extends AbstractService implements ContactServic
             throw new AuthenticationException(e);
         }
     }
-    
 }
