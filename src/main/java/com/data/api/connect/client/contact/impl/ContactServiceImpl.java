@@ -26,9 +26,8 @@
 package com.data.api.connect.client.contact.impl;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
@@ -44,7 +43,10 @@ import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.Response;
 
 
-public class ContactServiceImpl extends AbstractService implements ContactService {
+public class ContactServiceImpl extends AbstractAsyncService implements ContactService {
+    
+    private static final String GET_URL = "/connect/data/v3/contacts/get/";
+    
     
     public ContactServiceImpl (IOAuthData oAutData) {
         this.oAutData = oAutData;
@@ -53,38 +55,33 @@ public class ContactServiceImpl extends AbstractService implements ContactServic
     @Override
     public List<Contact> get(List<Long> ids) throws IOException,
             UnauthenticatedSessionException, AuthenticationException {
-        int statusCode = -1;
+        Response response = execute(asyncHttpClient.prepareGet(generateGetURL(ids)));
+        int statusCode = response.getStatusCode();
         String responseBody = null;
-        try {
-            Response response = execute(asyncHttpClient.prepareGet(env.SERVER()
-                    + "/connect/data/v3/contacts/get/" + StringUtils.join(ids, ",")));
-            statusCode = response.getStatusCode();
-            if (statusCode == 200) {
-                return processResponse(responseBody = response.getResponseBody());
-            }
+        if (statusCode == 200) {
+            return processResponse(responseBody = response.getResponseBody());
         }
-        catch (Exception e) {
-            // TODO: handle exception
-        }
-        throw new UnauthenticatedSessionException(statusCode + " " + responseBody);
+        
+        throw new AuthenticationException(statusCode + " " + responseBody);
     }
     
     @Override
     public void get(List<Long> ids, final AsyncCallback<List<Contact>> handler)
-            throws IOException, UnauthenticatedSessionException, AuthenticationException,
-            InterruptedException, ExecutionException {
-        execute(asyncHttpClient.prepareGet(env.SERVER()
-                + "/connect/data/v3/contacts/get/" + StringUtils.join(ids, ",")),
+            throws IOException, UnauthenticatedSessionException, AuthenticationException {
+        execute(asyncHttpClient.prepareGet(generateGetURL(ids)),
                 new AsyncCompletionHandler<Integer>() {
                     
                     @Override
                     public Integer onCompleted(Response response) throws Exception {
                         int statusCode = response.getStatusCode();
+                        String responseBody = null;
                         if (response.getStatusCode() == 200) {
                             handler.onCompleted(
-                                    processResponse(response.getResponseBody()), response);
+                                    processResponse(responseBody = response.getResponseBody()),
+                                    response);
                         }
-                        return statusCode;
+                        
+                        throw new AuthenticationException(statusCode + " " + responseBody);
                     }
                     
                     @Override
@@ -92,6 +89,13 @@ public class ContactServiceImpl extends AbstractService implements ContactServic
                         handler.onThrowable(t);
                     }
                 });
+    }
+    
+    private String generateGetURL(List<Long> ids) throws AuthenticationException {
+        if (ids == null || ids.size() > 1) {
+            throw new AuthenticationException("Contact ids collection can not be empty.");
+        }
+        return env.SERVER() + GET_URL + StringUtils.join(new HashSet<Long>(ids), ",");
     }
     
     protected List<Contact> processResponse(String response)

@@ -25,12 +25,12 @@
  ******************************************************************************/
 package com.data.api.connect.client.util;
 
-import java.util.List;
+import java.util.Collection;
 
 
 public class StringUtils {
     
-    public static <T extends Object> String join(List<T> list, final String separator) {
+    public static <T extends Object> String join(Collection<T> list, final String separator) {
         if (list == null) {
             return null;
         }

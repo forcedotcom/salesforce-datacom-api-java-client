@@ -23,20 +23,54 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.data.api.connect.client.contact;
+package com.data.api.connect.client.contact.impl;
 
 import java.io.IOException;
-import java.util.List;
-import com.data.api.connect.client.AsyncCallback;
 import com.data.api.connect.client.oauth2.AuthenticationException;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import com.ning.http.client.Response;
 
 
-public interface ContactService {
+public abstract class AbstractAsyncService extends AbstractService {
     
-    List<Contact> get(List<Long> ids) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
-    
-    void get(List<Long> ids, AsyncCallback<List<Contact>> handler) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
+    protected void execute(final BoundRequestBuilder builder,
+            final AsyncCompletionHandler<Integer> handler) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException {
+        authenticateSession();
+        setHeader(builder);
+        builder.execute(new AsyncCompletionHandler<Integer>() {
+            
+            @Override
+            public Integer onCompleted(Response response) throws Exception {
+                if (isTokenExpired(response.getStatusCode())) {
+                    authenticateSession();
+                    setHeader(builder);
+                    builder.execute(new AsyncCompletionHandler<Integer>() {
+                        
+                        @Override
+                        public Integer onCompleted(Response response) throws Exception {
+                            handler.onCompleted(response);
+                            return response.getStatusCode();
+                        }
+                        
+                        @Override
+                        public void onThrowable(Throwable t) {
+                            handler.onThrowable(t);
+                        }
+                    });
+                }
+                else {
+                    handler.onCompleted(response);
+                }
+                return response.getStatusCode();
+            }
+            
+            @Override
+            public void onThrowable(Throwable t) {
+                handler.onThrowable(t);
+            }
+        });
+    }
 }

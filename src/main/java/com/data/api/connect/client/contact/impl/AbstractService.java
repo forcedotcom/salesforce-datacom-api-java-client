@@ -36,7 +36,6 @@ import com.data.api.connect.client.oauth2.IOAuthData;
 import com.data.api.connect.client.oauth2.OAuthToken;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 import com.data.api.connect.client.oauth2.impl.AuthentificationMethod;
-import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
@@ -84,85 +83,31 @@ public abstract class AbstractService {
     protected ENV env = ENV.getInstance();
     
     protected Response execute(BoundRequestBuilder builder) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException, ExecutionException,
-            InterruptedException {
-        if (!authenticated) {
-            authenticateSession();
-        }
+            UnauthenticatedSessionException, AuthenticationException {
+        authenticateSession();
         
-        FluentCaseInsensitiveStringsMap header = new FluentCaseInsensitiveStringsMap();
-        header.add("Accept", "application/json");
-        header.add("Authorization", "BEARER " + oAuthToken.getAccessToken());
-        header.add("x-ddc-client-id", oAutData.getClientCode());
-        builder.setHeaders(header);
-        
-        Response response = builder.execute().get();
-        if (response.getStatusCode() == 401) {
-            // update access token
-            authenticateSession();
-            // update header
-            header.remove("Authorization");
-            header.add("Authorization", "BEARER " + oAuthToken.getAccessToken());
-            builder.setHeaders(header);
-            
+        Response response = null;
+        try {
+            setHeader(builder);
             response = builder.execute().get();
+            if (isTokenExpired(response.getStatusCode())) {
+                // update access token
+                authenticateSession();
+                setHeader(builder);
+                response = builder.execute().get();
+            }
         }
+        catch (ExecutionException e) {
+            throw new AuthenticationException(response.getStatusCode() + " "
+                    + response.getResponseBody());
+        }
+        catch (InterruptedException e) {
+            throw new AuthenticationException(response.getStatusCode() + " "
+                    + response.getResponseBody());
+        }
+        
         return response;
     }
-    
-    protected void execute(final BoundRequestBuilder builder,
-            final AsyncCompletionHandler<Integer> handler) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException, ExecutionException,
-            InterruptedException {
-        if (!authenticated) {
-            authenticateSession();
-        }
-        
-        final FluentCaseInsensitiveStringsMap header = new FluentCaseInsensitiveStringsMap();
-        header.add("Accept", "application/json");
-        header.add("Authorization", "BEARER " + oAuthToken.getAccessToken());
-        header.add("x-ddc-client-id", oAutData.getClientCode());
-        builder.setHeaders(header);
-        
-        builder.execute(new AsyncCompletionHandler<Integer>() {
-            
-            @Override
-            public Integer onCompleted(Response response) throws Exception {
-                if (response.getStatusCode() == 401) {
-                    // update access token
-                    authenticateSession();
-                    // update header
-                    header.remove("Authorization");
-                    header.add("Authorization", "BEARER " + oAuthToken.getAccessToken());
-                    builder.setHeaders(header);
-                    
-                    builder.execute(new AsyncCompletionHandler<Integer>() {
-                        
-                        @Override
-                        public Integer onCompleted(Response response) throws Exception {
-                            handler.onCompleted(response);
-                            return response.getStatusCode();
-                        }
-                        
-                        @Override
-                        public void onThrowable(Throwable t) {
-                            handler.onThrowable(t);
-                        }
-                    });
-                } else {
-                    handler.onCompleted(response);
-                }
-                return response.getStatusCode();
-            }
-            
-            @Override
-            public void onThrowable(Throwable t) {
-                handler.onThrowable(t);
-            }
-        });
-        
-    }
-    
     
     /**
      * @throws IOException
@@ -174,8 +119,22 @@ public abstract class AbstractService {
      */
     protected void authenticateSession() throws IOException,
             UnauthenticatedSessionException, AuthenticationException {
-        AuthentificationMethod method = authenticator.getAuthentificationMethod(this.oAutData);
-        oAuthToken = method.authenticate();
-        authenticated = true;
+        if (!authenticated) {
+            AuthentificationMethod method = authenticator.getAuthentificationMethod(this.oAutData);
+            oAuthToken = method.authenticate();
+            authenticated = true;
+        }
+    }
+    
+    protected void setHeader(BoundRequestBuilder builder) {
+        FluentCaseInsensitiveStringsMap header = new FluentCaseInsensitiveStringsMap();
+        header.add("Accept", "application/json");
+        header.add("Authorization", "BEARER " + oAuthToken.getAccessToken());
+        header.add("x-ddc-client-id", oAutData.getClientCode());
+        builder.setHeaders(header);
+    }
+    
+    protected boolean isTokenExpired(int statusCode){
+        return statusCode == 401;
     }
 }
