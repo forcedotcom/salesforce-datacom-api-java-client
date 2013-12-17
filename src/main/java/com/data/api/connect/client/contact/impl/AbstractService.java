@@ -26,13 +26,15 @@
 package com.data.api.connect.client.contact.impl;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.data.api.connect.client.ENV;
 import com.data.api.connect.client.oauth2.Authenticate;
 import com.data.api.connect.client.oauth2.AuthenticationException;
-import com.data.api.connect.client.oauth2.IOAuthData;
 import com.data.api.connect.client.oauth2.OAuthToken;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 import com.data.api.connect.client.oauth2.impl.AuthentificationMethod;
@@ -46,11 +48,11 @@ public abstract class AbstractService {
     
     /**
      * <p>
-     * The credentials data used to authenticate. Provided when this service is
+     * The config used to authenticate. Provided when this service is
      * instantiated.
      * </p>
      */
-    protected IOAuthData oAutData;
+    protected Map<String, String> config;
     
     /**
      * <p>
@@ -79,8 +81,6 @@ public abstract class AbstractService {
     
     // can reuse, share globally
     protected final static ObjectMapper mapper = new ObjectMapper();
-    
-    protected ENV env = ENV.getInstance();
     
     protected Response execute(BoundRequestBuilder builder) throws IOException,
             UnauthenticatedSessionException, AuthenticationException {
@@ -120,7 +120,7 @@ public abstract class AbstractService {
     protected void authenticateSession() throws IOException,
             UnauthenticatedSessionException, AuthenticationException {
         if (!authenticated) {
-            AuthentificationMethod method = authenticator.getAuthentificationMethod(this.oAutData);
+            AuthentificationMethod method = authenticator.getAuthentificationMethod(config);
             oAuthToken = method.authenticate();
             authenticated = true;
         }
@@ -130,11 +130,33 @@ public abstract class AbstractService {
         FluentCaseInsensitiveStringsMap header = new FluentCaseInsensitiveStringsMap();
         header.add("Accept", "application/json");
         header.add("Authorization", "BEARER " + oAuthToken.getAccessToken());
-        header.add("x-ddc-client-id", oAutData.getClientCode());
+        header.add("x-ddc-client-id", config.get("x-ddc-client-id"));
+        
+        header.add("USER_CLIENT", "salesforce-datacom-api-java-client-v1");
+        
         builder.setHeaders(header);
     }
     
-    protected boolean isTokenExpired(int statusCode){
+    protected boolean isTokenExpired(int statusCode) {
         return statusCode == 401;
+    }
+    
+    @SuppressWarnings({
+        "unchecked", "rawtypes"
+    })
+    protected <T extends Object> T processResponse(String response, Class clazz)
+            throws AuthenticationException {
+        try {
+            return (T) mapper.readValue(response, clazz);
+        }
+        catch (JsonParseException e) {
+            throw new AuthenticationException(e);
+        }
+        catch (JsonMappingException e) {
+            throw new AuthenticationException(e);
+        }
+        catch (IOException e) {
+            throw new AuthenticationException(e);
+        }
     }
 }

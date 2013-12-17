@@ -26,6 +26,7 @@
 package com.data.api.connect.client.oauth2;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.data.api.connect.client.oauth2.impl.AuthentificationMethod;
 import com.data.api.connect.client.oauth2.impl.UsernamePasswordAuthentication;
@@ -61,21 +62,24 @@ public class Authenticate {
      *             occurred
      * @throws AuthenticationException
      */
-    public OAuthToken authenticate(IOAuthData oAutData) throws IOException,
+    public OAuthToken authenticate(Map<String, String> config) throws IOException,
             UnauthenticatedSessionException, AuthenticationException {
-        return getAuthentificationMethod(oAutData).authenticate();
+        return getAuthentificationMethod(config).authenticate();
     }
     
-    public AuthentificationMethod getAuthentificationMethod(IOAuthData oAutData)
+    public AuthentificationMethod getAuthentificationMethod(Map<String, String> config)
             throws AuthenticationException {
-        switch (oAutData.getAuthMethod()) {
-            case PASSWORD:
-                 return new UsernamePasswordAuthentication(oAutData);
-            case REFRESH_TOKEN:
-//                 return new RefreshTokenAuthentication(chatterData);
-            default:
-                throw new AuthenticationException(oAutData.getAuthMethod()
+        if (config != null && config.containsKey("grant_type")) {
+            if ("password".equalsIgnoreCase(config.get("grant_type"))) {
+                
+                return new UsernamePasswordAuthentication(config);
+            }
+            else {
+                throw new AuthenticationException(config.get("grant_type")
                         + " is an unrecognised Auth form.");
+            }
         }
+        
+        return null;
     }
 }

@@ -28,15 +28,13 @@ package com.data.api.connect.client.contact.impl;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
+import java.util.Map;
 
 import com.data.api.connect.client.AsyncCallback;
 import com.data.api.connect.client.contact.Contact;
 import com.data.api.connect.client.contact.ContactService;
 import com.data.api.connect.client.contact.Contacts;
 import com.data.api.connect.client.oauth2.AuthenticationException;
-import com.data.api.connect.client.oauth2.IOAuthData;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 import com.data.api.connect.client.util.StringUtils;
 import com.ning.http.client.AsyncCompletionHandler;
@@ -48,8 +46,8 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
     private static final String GET_URL = "/connect/data/v3/contacts/get/";
     
     
-    public ContactServiceImpl (IOAuthData oAutData) {
-        this.oAutData = oAutData;
+    public ContactServiceImpl (Map<String, String> config) {
+        this.config = config;
     }
     
     @Override
@@ -59,7 +57,9 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
         int statusCode = response.getStatusCode();
         String responseBody = null;
         if (statusCode == 200) {
-            return processResponse(responseBody = response.getResponseBody());
+            Contacts contacts = processResponse(
+                    responseBody = response.getResponseBody(), Contacts.class);
+            return contacts != null ? contacts.getContacts() : null;
         }
         
         throw new AuthenticationException(statusCode + " " + responseBody);
@@ -76,9 +76,11 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
                         int statusCode = response.getStatusCode();
                         String responseBody = null;
                         if (response.getStatusCode() == 200) {
-                            handler.onCompleted(
-                                    processResponse(responseBody = response.getResponseBody()),
-                                    response);
+                            Contacts contacts = processResponse(
+                                    responseBody = response.getResponseBody(),
+                                    Contacts.class);
+                            handler.onCompleted(contacts != null ? contacts.getContacts()
+                                    : null, response);
                         }
                         
                         throw new AuthenticationException(statusCode + " " + responseBody);
@@ -95,23 +97,9 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
         if (ids == null || ids.size() > 1) {
             throw new AuthenticationException("Contact ids collection can not be empty.");
         }
-        return env.SERVER() + GET_URL + StringUtils.join(new HashSet<Long>(ids), ",");
-    }
-    
-    protected List<Contact> processResponse(String response)
-            throws AuthenticationException {
-        try {
-            Contacts contacts = mapper.readValue(response, Contacts.class);
-            return contacts != null ? contacts.getContacts() : null;
-        }
-        catch (JsonParseException e) {
-            throw new AuthenticationException(e);
-        }
-        catch (JsonMappingException e) {
-            throw new AuthenticationException(e);
-        }
-        catch (IOException e) {
-            throw new AuthenticationException(e);
-        }
+        return (config.containsKey("server_url") ? config.get("server_url")
+                : "https://api.jigsaw.com")
+                + GET_URL
+                + StringUtils.join(new HashSet<Long>(ids), ",");
     }
 }

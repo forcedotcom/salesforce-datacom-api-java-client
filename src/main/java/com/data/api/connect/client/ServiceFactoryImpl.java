@@ -23,20 +23,19 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.data.api.connect.client.oauth2;
+package com.data.api.connect.client;
+
+import java.util.Map;
+
+import com.data.api.connect.client.contact.ContactService;
+import com.data.api.connect.client.contact.impl.ContactServiceImpl;
 
 
-public interface IOAuthData {
+public class ServiceFactoryImpl implements ServiceFactory {
     
-    OAuthMethod getAuthMethod();
+    @Override
+    public ContactService createContactService(Map<String, String> config) {
+        return new ContactServiceImpl(config);
+    }
     
-    String getRefreshToken();
-    
-    String getClientKey();
-    
-    String getClientCode();
-    
-    String getUsername();
-    
-    String getPassword();
 }

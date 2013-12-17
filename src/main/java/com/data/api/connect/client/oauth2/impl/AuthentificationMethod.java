@@ -32,7 +32,6 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.PropertyNamingStrategy;
 
-import com.data.api.connect.client.ENV;
 import com.data.api.connect.client.oauth2.AuthenticationException;
 import com.data.api.connect.client.oauth2.OAuthToken;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
@@ -48,8 +47,6 @@ public abstract class AuthentificationMethod {
     }
     
     private AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
-    
-    protected ENV env = ENV.getInstance();
     
     public void setHttpClient(AsyncHttpClient asyncHttpClient) {
         this.asyncHttpClient = asyncHttpClient;

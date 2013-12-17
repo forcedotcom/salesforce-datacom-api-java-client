@@ -27,10 +27,10 @@ package com.data.api.connect.client.oauth2.impl;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import com.data.api.connect.client.oauth2.AuthenticationException;
-import com.data.api.connect.client.oauth2.IOAuthData;
 import com.data.api.connect.client.oauth2.OAuthToken;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
@@ -43,10 +43,10 @@ import com.ning.http.client.Response;
 public class UsernamePasswordAuthentication extends AuthentificationMethod {
     
     
-    private final IOAuthData oAuthData;
+    private Map<String, String> config;
     
-    public UsernamePasswordAuthentication (IOAuthData oAuthData) {
-        this.oAuthData = oAuthData;
+    public UsernamePasswordAuthentication (Map<String, String> config) {
+        this.config = config;
     }
     
     /**
@@ -65,20 +65,20 @@ public class UsernamePasswordAuthentication extends AuthentificationMethod {
     @Override
     public OAuthToken authenticate() throws IOException, UnauthenticatedSessionException,
             AuthenticationException {
-        String clientId = URLEncoder.encode(oAuthData.getClientKey(), "UTF-8");
-        String username = oAuthData.getUsername();
-        String password = oAuthData.getPassword();
+        String clientId = URLEncoder.encode(config.get("client_id"), "UTF-8");
         
         BoundRequestBuilder builder = getHttpClient().preparePost(
-                env.SERVER() + "/connect/oauth2/token");
+                (config.containsKey("server_url") ? config.get("server_url")
+                        : "https://api.jigsaw.com") + "/connect/oauth2/token");
         
         builder.addHeader("Accept", "application/json");
+        builder.addHeader("USER_CLIENT", "salesforce-datacom-api-java-client-v1");
         
         builder.addParameter("grant_type", "password");
         builder.addParameter("client_secret", "secret");
         builder.addParameter("client_id", clientId);
-        builder.addParameter("username", username);
-        builder.addParameter("password", password);
+        builder.addParameter("username", config.get("username"));
+        builder.addParameter("password", config.get("password"));
         
         Future<Response> f = builder.execute();
         int statusCode = -1;

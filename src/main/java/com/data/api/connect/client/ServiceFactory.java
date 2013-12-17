@@ -23,34 +23,14 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-
 package com.data.api.connect.client;
 
-public class ENV {
+import java.util.Map;
+
+import com.data.api.connect.client.contact.ContactService;
+
+
+public interface ServiceFactory {
     
-    private String SERVER = "https://api.jigsaw.com";
-    
-    private static ENV instance = null;
-    
-    protected ENV () {
-        // Exists only to defeat instantiation.
-    }
-    
-    public static ENV getInstance() {
-        if (instance == null) {
-            instance = new ENV();
-        }
-        return instance;
-    }
-    
-    public String SERVER(String SERVER) {
-        if (SERVER != null && SERVER.length() > 1) {
-            getInstance().SERVER = SERVER;
-        }
-        return getInstance().SERVER;
-    }
-    
-    public String SERVER() {
-        return getInstance().SERVER;
-    }
+    ContactService createContactService(Map<String, String> config);
 }
