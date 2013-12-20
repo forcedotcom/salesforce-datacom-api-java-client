@@ -32,5 +32,7 @@ import com.data.api.connect.client.contact.ContactService;
 
 public interface ServiceFactory {
     
+    ContactService createContactService();
+    
     ContactService createContactService(Map<String, String> config);
 }

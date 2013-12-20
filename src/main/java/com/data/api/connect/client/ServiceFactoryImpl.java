@@ -33,9 +33,27 @@ import com.data.api.connect.client.contact.impl.ContactServiceImpl;
 
 public class ServiceFactoryImpl implements ServiceFactory {
     
+    private Map<String, String> config;
+    
+    public ServiceFactoryImpl () {
+        super();
+    }
+    
+    public ServiceFactoryImpl (Map<String, String> config) {
+        this();
+        this.config = config;
+    }
+    
     @Override
     public ContactService createContactService(Map<String, String> config) {
         return new ContactServiceImpl(config);
     }
     
+    @Override
+    public ContactService createContactService() {
+        if (config == null) {
+            throw new NullPointerException("config can not be null");
+        }
+        return createContactService(config);
+    }
 }
