@@ -69,7 +69,7 @@ public class UsernamePasswordAuthentication extends AuthentificationMethod {
         
         BoundRequestBuilder builder = getHttpClient().preparePost(
                 (config.containsKey("server_url") ? config.get("server_url")
-                        : "https://api.jigsaw.com") + "/connect/oauth2/token");
+                        : "https://api.jigsaw.com/connect") + "/oauth2/token");
         
         builder.addHeader("Accept", "application/json");
         builder.addHeader("USER_CLIENT", "salesforce-datacom-api-java-client-v1");

@@ -43,7 +43,7 @@ import com.ning.http.client.Response;
 
 public class ContactServiceImpl extends AbstractAsyncService implements ContactService {
     
-    private static final String GET_URL = "/connect/data/v3/contacts/get/";
+    private static final String GET_URL = "/data/v3/contacts/get/";
     
     
     public ContactServiceImpl (Map<String, String> config) {
@@ -98,7 +98,7 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
             throw new AuthenticationException("Contact ids collection can not be empty.");
         }
         return (config.containsKey("server_url") ? config.get("server_url")
-                : "https://api.jigsaw.com")
+                : "https://api.jigsaw.com/connect")
                 + GET_URL
                 + StringUtils.join(new HashSet<Long>(ids), ",");
     }
