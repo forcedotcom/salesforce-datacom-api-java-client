@@ -12,14 +12,13 @@ Simply clone the salesforce-datacom-api-java-client project and incorporate it i
 
 Compiling the source is easy using maven:
 
-    maven clean install
+    mvn clean install
 
 The jar file can be found at target/salesforce-datacom-api-java-client-xx.xx.jar.
 
 # Features
 - Contact get
 - Contact purchase
-
 - Contact search (in progress)
 
 # Configuration and authentication
@@ -34,12 +33,11 @@ This is discouraged and the ClientSecret authentication is preferred over this o
 private static final Map<String, String> config = new HashMap<String, String>(){
     {
         put("grant_type", "password");
+
         put("username", "myApiUser@myorganisation.com");
         put("password", "myPassword");
         put("client_id", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         put("x-ddc-client-id", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        
-        put("server_url", "http://app17.qe1.jigsaw.com:8080/api_rest");
     }
 };
 ```
