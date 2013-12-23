@@ -33,10 +33,16 @@ import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 
 
 public interface ContactService {
-    
+    //get
     List<Contact> get(List<Long> ids) throws IOException,
             UnauthenticatedSessionException, AuthenticationException;
     
     void get(List<Long> ids, AsyncCallback<List<Contact>> handler) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException;
+    //purchase
+    List<Contact> purchase(List<Long> ids) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException;
+    
+    void purchase(List<Long> ids, AsyncCallback<List<Contact>> handler) throws IOException,
             UnauthenticatedSessionException, AuthenticationException;
 }

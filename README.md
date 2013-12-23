@@ -75,13 +75,12 @@ A very simple example:
 ServiceFactory factory = new ServiceFactoryImpl(config);
 
 ContactService service = factory.createContactService();
-
-List<com.data.api.connect.client.contact.Contact> contacts = service.get(Arrays.asList(17892515L));
+List<Contact> contacts = service.get(Arrays.asList(17892515L));
 ```
 or
 ```java
 ContactService service = new ContactServiceImpl(config);
-List<com.data.api.connect.client.contact.Contact> contacts = service.get(Arrays.asList(17892515L));
+List<Contact> contacts = service.get(Arrays.asList(17892515L));
 ```
 This contains almost all information you need.
 You create a simple Message object which holds whatever it is you would like to post (and which supports text, links and @mentions).

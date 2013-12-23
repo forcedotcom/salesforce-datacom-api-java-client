@@ -44,6 +44,7 @@ import com.ning.http.client.Response;
 public class ContactServiceImpl extends AbstractAsyncService implements ContactService {
     
     private static final String GET_URL = "/data/v3/contacts/get/";
+    private static final String PURCHASE_URL = "/data/v3/contacts/purchase/";
     
     
     public ContactServiceImpl (Map<String, String> config) {
@@ -93,6 +94,49 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
                 });
     }
     
+    @Override
+    public List<Contact> purchase(List<Long> ids) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException {
+        Response response = execute(asyncHttpClient.prepareGet(generatePurchaseURL(ids)));
+        int statusCode = response.getStatusCode();
+        String responseBody = null;
+        if (statusCode == 200) {
+            Contacts contacts = processResponse(
+                    responseBody = response.getResponseBody(), Contacts.class);
+            return contacts != null ? contacts.getContacts() : null;
+        }
+        
+        throw new AuthenticationException(statusCode + " " + responseBody);
+    }
+    
+    @Override
+    public void purchase(List<Long> ids, final AsyncCallback<List<Contact>> handler)
+            throws IOException, UnauthenticatedSessionException, AuthenticationException {
+        execute(asyncHttpClient.prepareGet(generatePurchaseURL(ids)),
+                new AsyncCompletionHandler<Integer>() {
+                    
+                    @Override
+                    public Integer onCompleted(Response response) throws Exception {
+                        int statusCode = response.getStatusCode();
+                        String responseBody = null;
+                        if (response.getStatusCode() == 200) {
+                            Contacts contacts = processResponse(
+                                    responseBody = response.getResponseBody(),
+                                    Contacts.class);
+                            handler.onCompleted(contacts != null ? contacts.getContacts()
+                                    : null, response);
+                        }
+                        
+                        throw new AuthenticationException(statusCode + " " + responseBody);
+                    }
+                    
+                    @Override
+                    public void onThrowable(Throwable t) {
+                        handler.onThrowable(t);
+                    }
+                });
+    }
+    
     private String generateGetURL(List<Long> ids) throws AuthenticationException {
         if (ids == null || ids.size() > 1) {
             throw new AuthenticationException("Contact ids collection can not be empty.");
@@ -100,6 +144,16 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
         return (config.containsKey("server_url") ? config.get("server_url")
                 : "https://api.jigsaw.com/connect")
                 + GET_URL
+                + StringUtils.join(new HashSet<Long>(ids), ",");
+    }
+    
+    private String generatePurchaseURL(List<Long> ids) throws AuthenticationException {
+        if (ids == null || ids.size() > 1) {
+            throw new AuthenticationException("Contact ids collection can not be empty.");
+        }
+        return (config.containsKey("server_url") ? config.get("server_url")
+                : "https://api.jigsaw.com/connect")
+                + PURCHASE_URL
                 + StringUtils.join(new HashSet<Long>(ids), ",");
     }
 }
