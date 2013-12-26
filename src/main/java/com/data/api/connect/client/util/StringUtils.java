@@ -30,7 +30,8 @@ import java.util.Collection;
 
 public class StringUtils {
     
-    public static <T extends Object> String join(Collection<T> list, final String separator) {
+    public static <T extends Object> String join(Collection<T> list,
+            final String separator) {
         if (list == null) {
             return null;
         }
@@ -45,4 +46,31 @@ public class StringUtils {
         }
         return buf.toString();
     }
+    
+    public static boolean isBlank(String str) {
+        int strLen;
+        if (str == null || (strLen = str.length()) == 0) {
+            return true;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if ((Character.isWhitespace(str.charAt(i)) == false)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public static boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        }
+        int sz = str.length();
+        for (int i = 0; i < sz; i++) {
+            if (Character.isDigit(str.charAt(i)) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
 }

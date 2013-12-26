@@ -32,8 +32,11 @@ import java.util.Map;
 
 import com.data.api.connect.client.AsyncCallback;
 import com.data.api.connect.client.contact.Contact;
+import com.data.api.connect.client.contact.ContactQuery;
 import com.data.api.connect.client.contact.ContactService;
 import com.data.api.connect.client.contact.Contacts;
+import com.data.api.connect.client.contact.converter.ContactQueryToParamsConverter;
+import com.data.api.connect.client.contact.validator.ContactQueryValidator;
 import com.data.api.connect.client.oauth2.AuthenticationException;
 import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 import com.data.api.connect.client.util.StringUtils;
@@ -45,100 +48,32 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
     
     private static final String GET_URL = "/data/v3/contacts/get/";
     private static final String PURCHASE_URL = "/data/v3/contacts/purchase/";
+    private static final String SEARCH_URL = "/data/v3/contacts/search/";
     
+    private ContactQueryToParamsConverter queryConverter;
+    private ContactQueryValidator queryValidator;
     
     public ContactServiceImpl (Map<String, String> config) {
         this.config = config;
+        
+        queryConverter = new ContactQueryToParamsConverter();
+        queryValidator = new ContactQueryValidator();
     }
     
     @Override
     public List<Contact> get(List<Long> ids) throws IOException,
             UnauthenticatedSessionException, AuthenticationException {
-        Response response = execute(asyncHttpClient.prepareGet(generateGetURL(ids)));
-        int statusCode = response.getStatusCode();
-        String responseBody = null;
-        if (statusCode == 200) {
-            Contacts contacts = processResponse(
-                    responseBody = response.getResponseBody(), Contacts.class);
-            return contacts != null ? contacts.getContacts() : null;
-        }
-        
-        throw new AuthenticationException(statusCode + " " + responseBody);
+        return executeSync(generateGetURL(ids));
     }
     
     @Override
     public void get(List<Long> ids, final AsyncCallback<List<Contact>> handler)
             throws IOException, UnauthenticatedSessionException, AuthenticationException {
-        execute(asyncHttpClient.prepareGet(generateGetURL(ids)),
-                new AsyncCompletionHandler<Integer>() {
-                    
-                    @Override
-                    public Integer onCompleted(Response response) throws Exception {
-                        int statusCode = response.getStatusCode();
-                        String responseBody = null;
-                        if (response.getStatusCode() == 200) {
-                            Contacts contacts = processResponse(
-                                    responseBody = response.getResponseBody(),
-                                    Contacts.class);
-                            handler.onCompleted(contacts != null ? contacts.getContacts()
-                                    : null, response);
-                        }
-                        
-                        throw new AuthenticationException(statusCode + " " + responseBody);
-                    }
-                    
-                    @Override
-                    public void onThrowable(Throwable t) {
-                        handler.onThrowable(t);
-                    }
-                });
-    }
-    
-    @Override
-    public List<Contact> purchase(List<Long> ids) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException {
-        Response response = execute(asyncHttpClient.prepareGet(generatePurchaseURL(ids)));
-        int statusCode = response.getStatusCode();
-        String responseBody = null;
-        if (statusCode == 200) {
-            Contacts contacts = processResponse(
-                    responseBody = response.getResponseBody(), Contacts.class);
-            return contacts != null ? contacts.getContacts() : null;
-        }
-        
-        throw new AuthenticationException(statusCode + " " + responseBody);
-    }
-    
-    @Override
-    public void purchase(List<Long> ids, final AsyncCallback<List<Contact>> handler)
-            throws IOException, UnauthenticatedSessionException, AuthenticationException {
-        execute(asyncHttpClient.prepareGet(generatePurchaseURL(ids)),
-                new AsyncCompletionHandler<Integer>() {
-                    
-                    @Override
-                    public Integer onCompleted(Response response) throws Exception {
-                        int statusCode = response.getStatusCode();
-                        String responseBody = null;
-                        if (response.getStatusCode() == 200) {
-                            Contacts contacts = processResponse(
-                                    responseBody = response.getResponseBody(),
-                                    Contacts.class);
-                            handler.onCompleted(contacts != null ? contacts.getContacts()
-                                    : null, response);
-                        }
-                        
-                        throw new AuthenticationException(statusCode + " " + responseBody);
-                    }
-                    
-                    @Override
-                    public void onThrowable(Throwable t) {
-                        handler.onThrowable(t);
-                    }
-                });
+        executeAsync(generateGetURL(ids), handler);
     }
     
     private String generateGetURL(List<Long> ids) throws AuthenticationException {
-        if (ids == null || ids.size() > 1) {
+        if (ids == null || ids.size() == 0) {
             throw new AuthenticationException("Contact ids collection can not be empty.");
         }
         return (config.containsKey("server_url") ? config.get("server_url")
@@ -147,8 +82,20 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
                 + StringUtils.join(new HashSet<Long>(ids), ",");
     }
     
+    @Override
+    public List<Contact> purchase(List<Long> ids) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException {
+        return executeSync(generatePurchaseURL(ids));
+    }
+    
+    @Override
+    public void purchase(List<Long> ids, final AsyncCallback<List<Contact>> handler)
+            throws IOException, UnauthenticatedSessionException, AuthenticationException {
+        executeAsync(generatePurchaseURL(ids), handler);
+    }
+    
     private String generatePurchaseURL(List<Long> ids) throws AuthenticationException {
-        if (ids == null || ids.size() > 1) {
+        if (ids == null || ids.size() == 0) {
             throw new AuthenticationException("Contact ids collection can not be empty.");
         }
         return (config.containsKey("server_url") ? config.get("server_url")
@@ -156,4 +103,71 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
                 + PURCHASE_URL
                 + StringUtils.join(new HashSet<Long>(ids), ",");
     }
+    
+    @Override
+    public List<Contact> search(ContactQuery query) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException {
+        return executeSync(generateSearchURL(query));
+    }
+    
+    @Override
+    public void search(ContactQuery query, AsyncCallback<List<Contact>> handler)
+            throws IOException, UnauthenticatedSessionException, AuthenticationException {
+        executeAsync(generateSearchURL(query), handler);
+    }
+    
+    private String generateSearchURL(ContactQuery query) throws AuthenticationException {
+        if (query == null) {
+            throw new AuthenticationException("ContactQuery can not be empty.");
+        }
+        
+        queryValidator.validate(query);
+        
+        List<String> params = queryConverter.convert(query);
+        return (config.containsKey("server_url") ? config.get("server_url")
+                : "https://api.jigsaw.com/connect")
+                + SEARCH_URL
+                + "?"
+                + StringUtils.join(new HashSet<String>(params), "&");
+    }
+    
+    private List<Contact> executeSync(String url) throws IOException,
+            UnauthenticatedSessionException, AuthenticationException {
+        Response response = execute(asyncHttpClient.prepareGet(url));
+        int statusCode = response.getStatusCode();
+        String responseBody = null;
+        if (statusCode == 200) {
+            Contacts contacts = processResponse(
+                    responseBody = response.getResponseBody(), Contacts.class);
+            return contacts != null ? contacts.getContacts() : null;
+        }
+        
+        throw new AuthenticationException(statusCode + " " + responseBody);
+    }
+    
+    private void executeAsync(String url, final AsyncCallback<List<Contact>> handler)
+            throws IOException, UnauthenticatedSessionException, AuthenticationException {
+        execute(asyncHttpClient.prepareGet(url), new AsyncCompletionHandler<Integer>() {
+            
+            @Override
+            public Integer onCompleted(Response response) throws Exception {
+                int statusCode = response.getStatusCode();
+                String responseBody = null;
+                if (response.getStatusCode() == 200) {
+                    Contacts contacts = processResponse(
+                            responseBody = response.getResponseBody(), Contacts.class);
+                    handler.onCompleted(contacts != null ? contacts.getContacts() : null,
+                            response);
+                }
+                
+                throw new AuthenticationException(statusCode + " " + responseBody);
+            }
+            
+            @Override
+            public void onThrowable(Throwable t) {
+                handler.onThrowable(t);
+            }
+        });
+    }
+    
 }

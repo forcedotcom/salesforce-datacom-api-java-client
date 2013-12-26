@@ -19,7 +19,7 @@ The jar file can be found at target/salesforce-datacom-api-java-client-xx.xx.jar
 # Features
 - Contact get
 - Contact purchase
-- Contact search (in progress)
+- Contact search
 
 # Configuration and authentication
 The Java REST API supports only one forms of authentication.
@@ -73,6 +73,29 @@ or
 ```java
 ContactService service = new ContactServiceImpl(config);
 List<Contact> contacts = service.purchase(Arrays.asList(17892515L));
+```
+This contains almost all information you need.
+
+## Contact search
+A very simple example:
+```java
+ServiceFactory factory = new ServiceFactoryImpl(config);
+
+ContactService service = factory.createContactService();
+
+ContactQuery query = new ContactQuery();
+query.setLastName("Ashley");
+        
+List<Contact> contacts = service.search(query);
+```
+or
+```java
+ContactService service = new ContactServiceImpl(config);
+
+ContactQuery query = new ContactQuery();
+query.setLastName("Ashley");
+        
+List<Contact> contacts = service.search(query);
 ```
 This contains almost all information you need.
 

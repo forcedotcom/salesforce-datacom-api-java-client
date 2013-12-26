@@ -23,35 +23,15 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package com.data.api.connect.client.contact;
+package com.data.api.connect.client.util;
 
-import java.io.IOException;
-import java.util.List;
-import com.data.api.connect.client.AsyncCallback;
-import com.data.api.connect.client.oauth2.AuthenticationException;
-import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
+import java.util.Collection;
 
 
-public interface ContactService {
+public class CollectionUtils {
     
-    // get
-    List<Contact> get(List<Long> ids) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
+    public static boolean isEmpty(Collection collection) {
+        return (collection == null || collection.isEmpty());
+    }
     
-    void get(List<Long> ids, AsyncCallback<List<Contact>> handler) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
-    
-    // purchase
-    List<Contact> purchase(List<Long> ids) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
-    
-    void purchase(List<Long> ids, AsyncCallback<List<Contact>> handler)
-            throws IOException, UnauthenticatedSessionException, AuthenticationException;
-    
-    // search
-    List<Contact> search(ContactQuery query) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
-    
-    void search(ContactQuery query, AsyncCallback<List<Contact>> handler)
-            throws IOException, UnauthenticatedSessionException, AuthenticationException;
 }
