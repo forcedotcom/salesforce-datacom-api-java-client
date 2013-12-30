@@ -86,7 +86,7 @@ ContactService service = factory.createContactService();
 ContactQuery query = new ContactQuery();
 query.setLastName("Ashley");
         
-List<Contact> contacts = service.search(query);
+SearchContacts contacts = service.search(query);
 ```
 or
 ```java
@@ -95,7 +95,7 @@ ContactService service = new ContactServiceImpl(config);
 ContactQuery query = new ContactQuery();
 query.setLastName("Ashley");
         
-List<Contact> contacts = service.search(query);
+SearchContacts contacts = service.search(query);
 ```
 This contains almost all information you need.
 
