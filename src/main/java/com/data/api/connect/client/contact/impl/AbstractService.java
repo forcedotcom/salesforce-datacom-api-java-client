@@ -132,7 +132,7 @@ public abstract class AbstractService {
         header.add("Authorization", "BEARER " + oAuthToken.getAccessToken());
         header.add("x-ddc-client-id", config.get("x-ddc-client-id"));
         
-        header.add("USER_CLIENT", "salesforce-datacom-api-java-client-v1");
+        header.add("UserClient", "salesforce-datacom-api-java-client-v1");
         
         builder.setHeaders(header);
     }

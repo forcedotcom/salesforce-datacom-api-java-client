@@ -35,6 +35,7 @@ import com.data.api.connect.client.contact.Contact;
 import com.data.api.connect.client.contact.ContactQuery;
 import com.data.api.connect.client.contact.ContactService;
 import com.data.api.connect.client.contact.Contacts;
+import com.data.api.connect.client.contact.SearchContacts;
 import com.data.api.connect.client.contact.converter.ContactQueryToParamsConverter;
 import com.data.api.connect.client.contact.validator.ContactQueryValidator;
 import com.data.api.connect.client.oauth2.AuthenticationException;
@@ -48,7 +49,7 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
     
     private static final String GET_URL = "/data/v3/contacts/get/";
     private static final String PURCHASE_URL = "/data/v3/contacts/purchase/";
-    private static final String SEARCH_URL = "/data/v3/contacts/search/";
+    private static final String SEARCH_URL = "/data/v3/contacts/search";
     
     private ContactQueryToParamsConverter queryConverter;
     private ContactQueryValidator queryValidator;
@@ -105,15 +106,44 @@ public class ContactServiceImpl extends AbstractAsyncService implements ContactS
     }
     
     @Override
-    public List<Contact> search(ContactQuery query) throws IOException,
+    public SearchContacts search(ContactQuery query) throws IOException,
             UnauthenticatedSessionException, AuthenticationException {
-        return executeSync(generateSearchURL(query));
+        Response response = execute(asyncHttpClient.prepareGet(generateSearchURL(query)));
+        int statusCode = response.getStatusCode();
+        String responseBody = null;
+        if (statusCode == 200) {
+            return processResponse(responseBody = response.getResponseBody(),
+                    SearchContacts.class);
+        }
+        
+        throw new AuthenticationException(statusCode + " " + responseBody);
     }
     
     @Override
-    public void search(ContactQuery query, AsyncCallback<List<Contact>> handler)
+    public void search(ContactQuery query, final AsyncCallback<SearchContacts> handler)
             throws IOException, UnauthenticatedSessionException, AuthenticationException {
-        executeAsync(generateSearchURL(query), handler);
+        execute(asyncHttpClient.prepareGet(generateSearchURL(query)),
+                new AsyncCompletionHandler<Integer>() {
+                    
+                    @Override
+                    public Integer onCompleted(Response response) throws Exception {
+                        int statusCode = response.getStatusCode();
+                        String responseBody = null;
+                        if (response.getStatusCode() == 200) {
+                            SearchContacts searchContacts = processResponse(
+                                    responseBody = response.getResponseBody(),
+                                    SearchContacts.class);
+                            handler.onCompleted(searchContacts, response);
+                        }
+                        
+                        throw new AuthenticationException(statusCode + " " + responseBody);
+                    }
+                    
+                    @Override
+                    public void onThrowable(Throwable t) {
+                        handler.onThrowable(t);
+                    }
+                });
     }
     
     private String generateSearchURL(ContactQuery query) throws AuthenticationException {

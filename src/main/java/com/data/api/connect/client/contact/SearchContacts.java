@@ -25,33 +25,32 @@
  ******************************************************************************/
 package com.data.api.connect.client.contact;
 
-import java.io.IOException;
 import java.util.List;
-import com.data.api.connect.client.AsyncCallback;
-import com.data.api.connect.client.oauth2.AuthenticationException;
-import com.data.api.connect.client.oauth2.UnauthenticatedSessionException;
 
 
-public interface ContactService {
+public class SearchContacts {
     
-    // get
-    List<Contact> get(List<Long> ids) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
+    private Long totalHits;
+    private List<Contact> contacts;
     
-    void get(List<Long> ids, AsyncCallback<List<Contact>> handler) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
+    public SearchContacts () {
+        super();
+    }
     
-    // purchase
-    List<Contact> purchase(List<Long> ids) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
+    public Long getTotalHits() {
+        return totalHits;
+    }
     
-    void purchase(List<Long> ids, AsyncCallback<List<Contact>> handler)
-            throws IOException, UnauthenticatedSessionException, AuthenticationException;
+    public void setTotalHits(Long totalHits) {
+        this.totalHits = totalHits;
+    }
     
-    // search
-    SearchContacts search(ContactQuery query) throws IOException,
-            UnauthenticatedSessionException, AuthenticationException;
     
-    void search(ContactQuery query, AsyncCallback<SearchContacts> handler)
-            throws IOException, UnauthenticatedSessionException, AuthenticationException;
+    public List<Contact> getContacts() {
+        return contacts;
+    }
+    
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
+    }
 }
