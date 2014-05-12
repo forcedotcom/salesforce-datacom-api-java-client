@@ -75,7 +75,8 @@ public class UsernamePasswordAuthentication extends AuthentificationMethod {
         builder.addHeader("USER_CLIENT", "salesforce-datacom-api-java-client-v1");
         
         builder.addParameter("grant_type", "password");
-        builder.addParameter("client_secret", "secret");
+        builder.addParameter("client_secret", config.containsKey("client_secret")
+                ? config.get("client_secret") : "secret");
         builder.addParameter("client_id", clientId);
         builder.addParameter("username", config.get("username"));
         builder.addParameter("password", config.get("password"));

@@ -61,208 +61,234 @@ public class ContactQuery {
         return firstName;
     }
     
-    public void setFirstName(String firstName) {
+    public ContactQuery setFirstName(String firstName) {
         this.firstName = firstName;
+        return this;
     }
     
     public String getLastName() {
         return lastName;
     }
     
-    public void setLastName(String lastName) {
+    public ContactQuery setLastName(String lastName) {
         this.lastName = lastName;
+        return this;
     }
     
     public String getEmail() {
         return email;
     }
     
-    public void setEmail(String email) {
+    public ContactQuery setEmail(String email) {
         this.email = email;
+        return this;
     }
     
     public Boolean getShowDirectDialsOnly() {
         return showDirectDialsOnly;
     }
     
-    public void setShowDirectDialsOnly(Boolean showDirectDialsOnly) {
+    public ContactQuery setShowDirectDialsOnly(Boolean showDirectDialsOnly) {
         this.showDirectDialsOnly = showDirectDialsOnly;
+        return this;
     }
     
     public Boolean getShowInactive() {
         return showInactive;
     }
     
-    public void setShowInactive(Boolean showInactive) {
+    public ContactQuery setShowInactive(Boolean showInactive) {
         this.showInactive = showInactive;
+        return this;
     }
     
     public List<String> getTitle() {
         return title;
     }
     
-    public void setTitle(List<String> title) {
+    public ContactQuery setTitle(List<String> title) {
         this.title = title;
+        return this;
     }
     
     public List<String> getAreaCode() {
         return areaCode;
     }
     
-    public void setAreaCode(List<String> areaCode) {
+    public ContactQuery setAreaCode(List<String> areaCode) {
         this.areaCode = areaCode;
+        return this;
     }
     
     public List<String> getZipCode() {
         return zipCode;
     }
     
-    public void setZipCode(List<String> zipCode) {
+    public ContactQuery setZipCode(List<String> zipCode) {
         this.zipCode = zipCode;
+        return this;
     }
     
     public List<Integer> getDepartment() {
         return department;
     }
     
-    public void setDepartment(List<Integer> department) {
+    public ContactQuery setDepartment(List<Integer> department) {
         this.department = department;
+        return this;
     }
     
     public List<Integer> getLevel() {
         return level;
     }
     
-    public void setLevel(List<Integer> level) {
+    public ContactQuery setLevel(List<Integer> level) {
         this.level = level;
+        return this;
     }
     
     public List<Integer> getRevenue() {
         return revenue;
     }
     
-    public void setRevenue(List<Integer> revenue) {
+    public ContactQuery setRevenue(List<Integer> revenue) {
         this.revenue = revenue;
+        return this;
     }
     
     public List<Integer> getEmployee() {
         return employee;
     }
     
-    public void setEmployee(List<Integer> employee) {
+    public ContactQuery setEmployee(List<Integer> employee) {
         this.employee = employee;
+        return this;
     }
     
     public String getFortuneRank() {
         return fortuneRank;
     }
     
-    public void setFortuneRank(String fortuneRank) {
+    public ContactQuery setFortuneRank(String fortuneRank) {
         this.fortuneRank = fortuneRank;
+        return this;
     }
     
     public List<Integer> getOwnership() {
         return ownership;
     }
     
-    public void setOwnership(List<Integer> ownership) {
+    public ContactQuery setOwnership(List<Integer> ownership) {
         this.ownership = ownership;
+        return this;
     }
     
     public Boolean getExcludeOwned() {
         return excludeOwned;
     }
     
-    public void setExcludeOwned(Boolean excludeOwned) {
+    public ContactQuery setExcludeOwned(Boolean excludeOwned) {
         this.excludeOwned = excludeOwned;
+        return this;
     }
     
     public List<String> getCountry() {
         return country;
     }
     
-    public void setCountry(List<String> country) {
+    public ContactQuery setCountry(List<String> country) {
         this.country = country;
+        return this;
     }
     
     public List<String> getState() {
         return state;
     }
     
-    public void setState(List<String> state) {
+    public ContactQuery setState(List<String> state) {
         this.state = state;
+        return this;
     }
     
     public List<Integer> getIndustry() {
         return industry;
     }
     
-    public void setIndustry(List<Integer> industry) {
+    public ContactQuery setIndustry(List<Integer> industry) {
         this.industry = industry;
+        return this;
     }
     
     public List<Integer> getSubIndustry() {
         return subIndustry;
     }
     
-    public void setSubIndustry(List<Integer> subIndustry) {
+    public ContactQuery setSubIndustry(List<Integer> subIndustry) {
         this.subIndustry = subIndustry;
+        return this;
     }
     
     public List<Integer> getCompanyId() {
         return companyId;
     }
     
-    public void setCompanyId(List<Integer> companyId) {
+    public ContactQuery setCompanyId(List<Integer> companyId) {
         this.companyId = companyId;
+        return this;
     }
     
     public List<String> getCompanyName() {
         return companyName;
     }
     
-    public void setCompanyName(List<String> companyName) {
+    public ContactQuery setCompanyName(List<String> companyName) {
         this.companyName = companyName;
+        return this;
     }
     
     public Integer getLastUpdated() {
         return lastUpdated;
     }
     
-    public void setLastUpdated(Integer lastUpdated) {
+    public ContactQuery setLastUpdated(Integer lastUpdated) {
         this.lastUpdated = lastUpdated;
+        return this;
     }
     
     public Integer getOffset() {
         return offset;
     }
     
-    public void setOffset(Integer offset) {
+    public ContactQuery setOffset(Integer offset) {
         this.offset = offset;
+        return this;
     }
     
     public Integer getPageSize() {
         return pageSize;
     }
     
-    public void setPageSize(Integer pageSize) {
+    public ContactQuery setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+        return this;
     }
     
     public String getOrder() {
         return order;
     }
     
-    public void setOrder(String order) {
+    public ContactQuery setOrder(String order) {
         this.order = order;
+        return this;
     }
     
     public String getOrderBy() {
         return orderBy;
     }
     
-    public void setOrderBy(String orderBy) {
+    public ContactQuery setOrderBy(String orderBy) {
         this.orderBy = orderBy;
+        return this;
     }
     
     @Override
